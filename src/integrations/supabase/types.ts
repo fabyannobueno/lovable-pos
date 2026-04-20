@@ -14,16 +14,141 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      companies: {
+        Row: {
+          address: string | null
+          business_type: Database["public"]["Enums"]["business_type"]
+          created_at: string
+          created_by: string
+          document: string | null
+          email: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          phone: string | null
+          settings: Json
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          business_type?: Database["public"]["Enums"]["business_type"]
+          created_at?: string
+          created_by: string
+          document?: string | null
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          phone?: string | null
+          settings?: Json
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          business_type?: Database["public"]["Enums"]["business_type"]
+          created_at?: string
+          created_by?: string
+          document?: string | null
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          phone?: string | null
+          settings?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      company_members: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["company_role"]
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["company_role"]
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["company_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_company_role: {
+        Args: {
+          _company_id: string
+          _role: Database["public"]["Enums"]["company_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_company_member: {
+        Args: { _company_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      business_type:
+        | "restaurant"
+        | "snack_bar"
+        | "market"
+        | "distributor"
+        | "delivery"
+        | "retail"
+        | "other"
+      company_role: "owner" | "manager" | "cashier" | "waiter" | "kitchen"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +275,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      business_type: [
+        "restaurant",
+        "snack_bar",
+        "market",
+        "distributor",
+        "delivery",
+        "retail",
+        "other",
+      ],
+      company_role: ["owner", "manager", "cashier", "waiter", "kitchen"],
+    },
   },
 } as const
