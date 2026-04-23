@@ -140,6 +140,11 @@ export default function Auth() {
                         <Label htmlFor="signin-password">Senha</Label>
                         <Input id="signin-password" type="password" required value={signInPassword} onChange={(e) => setSignInPassword(e.target.value)} placeholder="••••••••" />
                       </div>
+                      <div className="flex justify-end -mt-2">
+                        <Link to="/forgot-password" className="text-xs font-medium text-primary hover:underline">
+                          Esqueci minha senha
+                        </Link>
+                      </div>
                       <Button type="submit" className="w-full" disabled={loading}>
                         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Entrar
