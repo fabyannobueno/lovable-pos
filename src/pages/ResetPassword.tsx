@@ -21,19 +21,46 @@ export default function ResetPassword() {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    // Supabase recovery puts tokens in URL hash. Detect it before allowing reset.
-    const hash = window.location.hash;
-    const isRecovery = hash.includes("type=recovery") || hash.includes("access_token");
+    let cancelled = false;
 
-    if (isRecovery) {
-      setValidLink(true);
-      return;
-    }
+    const init = async () => {
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get("code");
+      const errorDesc = url.searchParams.get("error_description") || url.hash.includes("error=");
 
-    // Fallback: check if user has an active session created by the recovery link
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setValidLink(!!session);
-    });
+      if (errorDesc && !code) {
+        if (!cancelled) setValidLink(false);
+        return;
+      }
+
+      // PKCE flow (newer): ?code=... — exchange for a session.
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        // Clean URL so the code can't be reused
+        window.history.replaceState({}, "", "/reset-password");
+        if (!cancelled) setValidLink(!error);
+        return;
+      }
+
+      // Legacy hash flow: #access_token=...&type=recovery — Supabase JS picks it up automatically.
+      const hash = window.location.hash;
+      if (hash.includes("type=recovery") || hash.includes("access_token")) {
+        // Give the client a tick to parse the hash and create the session.
+        await new Promise((r) => setTimeout(r, 200));
+        const { data } = await supabase.auth.getSession();
+        if (!cancelled) setValidLink(!!data.session);
+        return;
+      }
+
+      // No tokens in URL — fall back to checking for an active recovery session.
+      const { data } = await supabase.auth.getSession();
+      if (!cancelled) setValidLink(!!data.session);
+    };
+
+    init();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
